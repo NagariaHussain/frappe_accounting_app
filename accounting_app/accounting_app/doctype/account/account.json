@@ -15,7 +15,7 @@
   "rgt",
   "is_group",
   "old_parent",
-  "parent_account"
+  "account_type"
  ],
  "fields": [
   {
@@ -72,6 +72,7 @@
    "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "is_group",
    "fieldtype": "Check",
    "label": "Is Group"
@@ -85,15 +86,23 @@
   {
    "fieldname": "parent_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
    "label": "Parent Account",
-   "options": "Account"
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "account_type",
+   "fieldtype": "Data",
+   "label": "Account Type"
   }
  ],
  "icon": "fa fa-money",
  "index_web_pages_for_search": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2021-03-02 14:00:02.959446",
+ "modified": "2021-03-08 09:36:58.278190",
  "modified_by": "Administrator",
  "module": "Accounting App",
  "name": "Account",
