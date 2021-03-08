@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+import json
 from frappe.model.document import Document
 
 @frappe.whitelist()
@@ -18,5 +19,15 @@ def import_coa(filename):
     if extension != ".json":
         frappe.throw("Please upload a JSON file.")
 
+    # Get path to file
+    file_path = file_doc.get_full_path()
+
+    # Load and validate JSON data
+    with open(file_path, 'r') as json_file:
+        try:
+            data = json.load(json_file)
+        except json.decoder.JSONDecodeError as e:
+            frappe.throw("Invalid JSON content.")
+    
 class COAImporter(Document):
 	pass
