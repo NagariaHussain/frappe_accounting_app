@@ -32,4 +32,15 @@ class JournalEntry(Document):
 
 	def make_gl_entries(self):
 		'''create and save General Ledger Entries'''
-		pass
+		for acc in self.get("accounts"):
+			# Create new LE doc
+			le = frappe.new_doc("Ledger Entry")
+
+			# Set fields
+			le.account = acc.account
+			le.debit = acc.debit
+			le.credit = acc.credit
+			le.posting_date = self.posting_date
+
+			# Save LE doc
+			le.submit()
