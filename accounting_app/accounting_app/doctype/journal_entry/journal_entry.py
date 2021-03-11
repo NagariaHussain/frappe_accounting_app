@@ -30,17 +30,28 @@ class JournalEntry(Document):
 	def on_submit(self):
 		self.make_gl_entries()
 
-	def make_gl_entries(self):
+	def make_gl_entries(self, is_cancel=0):
 		'''create and save General Ledger Entries'''
 		for acc in self.get("accounts"):
 			# Create new LE doc
 			le = frappe.new_doc("Ledger Entry")
 
 			# Set fields
+			if is_cancel:
+				le.debit = acc.credit
+				le.credit = acc.debit
+			else:
+				le.debit = acc.debit
+				le.credit = acc.credit
+
 			le.account = acc.account
-			le.debit = acc.debit
-			le.credit = acc.credit
 			le.posting_date = self.posting_date
 
 			# Save LE doc
 			le.submit()
+
+	def on_cancel(self):
+		# Create reverse GL entries 
+		# for this Journal Entry
+		self.make_gl_entries(1)
+
