@@ -3,7 +3,8 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-# import frappe
+
+import frappe
 from frappe.model.document import Document
 from frappe.utils import flt
 
@@ -36,6 +37,24 @@ class PurchaseInvoice(Document):
 			total += flt(item.amount)
 		
 		self.grand_total = total
+
+	def on_submit(self):
+		self.make_gl_entries()
+	
+	def make_gl_entries(self):
+		# Credit
+		credit_gle = frappe.new_doc("Ledger Entry")
+		credit_gle.account = "Creditors"
+		credit_gle.credit = self.grand_total
+		credit_gle.debit = flt(0, self.precision("grand_total"))
+		credit_gle.submit()
+
+		# Debit
+		debit_gle = frappe.new_doc("Ledger Entry")
+		debit_gle.account = "Stock In Hand"
+		debit_gle.debit = self.grand_total
+		debit_gle.credit = flt(0, self.precision("grand_total"))
+		debit_gle.submit()
 
 
 
