@@ -13,7 +13,6 @@
  ],
  "fields": [
   {
-   "default": "now",
    "fieldname": "posting_date",
    "fieldtype": "Date",
    "label": "Posting Date"
@@ -47,7 +46,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-03-11 07:33:31.497944",
+ "modified": "2021-03-12 17:32:54.750722",
  "modified_by": "Administrator",
  "module": "Accounting App",
  "name": "Ledger Entry",
