@@ -5,11 +5,13 @@
 from __future__ import unicode_literals
 # import frappe
 from frappe.model.document import Document
+from frappe.utils import flt
 
 class PurchaseInvoice(Document):
 	def validate(self):
 		self.set_status()
-		
+		self.set_grand_total()
+
 	def set_status(self):
 		if self.is_new():
 			if self.get('amended_form'):
@@ -23,6 +25,17 @@ class PurchaseInvoice(Document):
 				self.status = "Paid"
 			else:
 				self.status = "Unpaid"
+
+	def set_grand_total(self):
+		total = flt(
+			0, 
+			self.precision("grand_total")
+		)
+
+		for item in self.get("items"):
+			total += flt(item.amount)
+		
+		self.grand_total = total
 
 
 
