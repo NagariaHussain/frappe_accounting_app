@@ -9,7 +9,8 @@
   "title",
   "naming_series",
   "items",
-  "amended_from"
+  "amended_from",
+  "status"
  ],
  "fields": [
   {
@@ -39,12 +40,21 @@
    "options": "Purchase Invoice",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nPaid\nUnpaid\nCancelled",
+   "print_hide": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-11 12:53:27.304565",
+ "modified": "2021-03-12 16:04:02.756014",
  "modified_by": "Administrator",
  "module": "Accounting App",
  "name": "Purchase Invoice",
