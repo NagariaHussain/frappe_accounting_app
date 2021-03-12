@@ -56,7 +56,26 @@ class PurchaseInvoice(Document):
 		debit_gle.credit = flt(0, self.precision("grand_total"))
 		debit_gle.submit()
 
+	def on_cancel(self):
+		# Update status
+		self.set_status()
+		# Make reverse entries
+		self.make_reverse_gl_entries()
 
+	def make_reverse_gl_entries(self):
+		# Credit
+		credit_gle = frappe.new_doc("Ledger Entry")
+		credit_gle.account = "Creditors"
+		credit_gle.debit = self.grand_total
+		credit_gle.credit = flt(0, self.precision("grand_total"))
+		credit_gle.submit()
+
+		# Debit
+		debit_gle = frappe.new_doc("Ledger Entry")
+		debit_gle.account = "Stock In Hand"
+		debit_gle.credit = self.grand_total
+		debit_gle.debit = flt(0, self.precision("grand_total"))
+		debit_gle.submit()
 
 
 	
