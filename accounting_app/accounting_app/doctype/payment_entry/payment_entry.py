@@ -11,9 +11,11 @@ class PaymentEntry(Document):
 	def on_submit(self):
 		if self.voucher_type == "Purchase Invoice":
 			self.make_pi_gl_entries()
+		elif self.voucher_type == "Sales Invoice":
+			self.make_si_gl_entries()
 		else:
-			pass
-		
+			frappe.throw("Payment entry can only be made against SI or PI")
+
 		self.update_linked_voucher()
 
 	def make_pi_gl_entries(self):
@@ -35,7 +37,7 @@ class PaymentEntry(Document):
 		if self.voucher_type == "Purchase Invoice":
 			self.make_reverse_pi_gl_entries()
 		else:
-			pass
+			self.make_reverse_si_gl_entries()
 		
 		self.update_linked_voucher()
 
@@ -53,6 +55,36 @@ class PaymentEntry(Document):
 		credit_gl_entry.credit = self.amount
 		credit_gl_entry.debit = flt(0, self.precision("amount"))
 		credit_gl_entry.submit()
+
+	def make_si_gl_entries(self):
+		# Credit
+		credit_gle = frappe.new_doc("Ledger Entry")
+		credit_gle.account = "Debtors"
+		credit_gle.credit = self.amount
+		credit_gle.debit = flt(0, self.precision("amount"))
+		credit_gle.submit()
+
+		# Debit
+		debit_gle = frappe.new_doc("Ledger Entry")
+		debit_gle.account = "Sales"
+		debit_gle.debit = self.amount
+		debit_gle.credit = flt(0, self.precision("amount"))
+		debit_gle.submit()
+
+	def make_reverse_si_gl_entries(self):
+		# Credit
+		credit_gle = frappe.new_doc("Ledger Entry")
+		credit_gle.account = "Sales"
+		credit_gle.credit = self.amount
+		credit_gle.debit = flt(0, self.precision("amount"))
+		credit_gle.submit()
+
+		# Debit
+		debit_gle = frappe.new_doc("Ledger Entry")
+		debit_gle.account = "Debtors"
+		debit_gle.debit = self.amount
+		debit_gle.credit = flt(0, self.precision("amount"))
+		debit_gle.submit()
 
 	def update_linked_voucher(self):
 		voucher = frappe.get_doc(self.voucher_type, self.voucher_link)
