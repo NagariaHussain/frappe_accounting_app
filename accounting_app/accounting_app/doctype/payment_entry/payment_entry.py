@@ -5,10 +5,33 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils import nowdate
+from frappe.utils import nowdate, flt
 
 class PaymentEntry(Document):
-	pass
+	def on_submit(self):
+		if self.voucher_type == "Purchase Invoice":
+			self.make_pi_gl_entries()
+		else:
+			pass
+		
+		voucher = frappe.get_doc(self.voucher_type, self.voucher_link)
+		voucher.paid = True
+		voucher.save()
+
+	def make_pi_gl_entries(self):
+		# Debit the "Creditors" account
+		debit_gl_entry = frappe.new_doc("Ledger Entry")
+		debit_gl_entry.account = "Creditors"
+		debit_gl_entry.credit = flt(0, self.precision("amount"))
+		debit_gl_entry.debit = self.amount
+		debit_gl_entry.submit()
+
+		# Credit the "Expenses" account
+		credit_gl_entry = frappe.new_doc("Ledger Entry")
+		credit_gl_entry.account = self.credit_account
+		credit_gl_entry.credit = self.amount
+		credit_gl_entry.debit = flt(0, self.precision("amount"))
+		credit_gl_entry.submit()
 
 @frappe.whitelist()
 def get_payment_entry(dt, dn):
