@@ -34,6 +34,32 @@ class PaymentEntry(Document):
 		credit_gl_entry.debit = flt(0, self.precision("amount"))
 		credit_gl_entry.submit()
 
+	def on_cancel(self):
+		if self.voucher_type == "Purchase Invoice":
+			self.make_reverse_pi_gl_entries()
+		else:
+			pass
+		
+		voucher = frappe.get_doc(self.voucher_type, self.voucher_link)
+		voucher.paid = False
+		voucher.set_status()
+		voucher.save()
+
+	def make_reverse_pi_gl_entries(self):
+		# Credit the "Expenses" account
+		debit_gl_entry = frappe.new_doc("Ledger Entry")
+		debit_gl_entry.account = self.credit_account
+		debit_gl_entry.credit = flt(0, self.precision("amount"))
+		debit_gl_entry.debit = self.amount
+		debit_gl_entry.submit()
+
+		# Debit the "Creditors" account
+		credit_gl_entry = frappe.new_doc("Ledger Entry")
+		credit_gl_entry.account = "Creditors"
+		credit_gl_entry.credit = self.amount
+		credit_gl_entry.debit = flt(0, self.precision("amount"))
+		credit_gl_entry.submit()
+
 @frappe.whitelist()
 def get_payment_entry(dt, dn):
 	# Fetch the associated doc
