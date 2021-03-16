@@ -10,87 +10,44 @@ from frappe.utils import nowdate, flt
 class PaymentEntry(Document):
 	def on_submit(self):
 		if self.voucher_type == "Purchase Invoice":
-			self.make_pi_gl_entries()
+			self.make_gl_entries("Creditors", self.credit_account)
 		elif self.voucher_type == "Sales Invoice":
-			self.make_si_gl_entries()
+			self.make_gl_entries("Sales", "Debtors")
 		else:
 			frappe.throw("Payment entry can only be made against SI or PI")
 
 		self.update_linked_voucher()
 
-	def make_pi_gl_entries(self):
-		# Debit the "Creditors" account
-		debit_gl_entry = frappe.new_doc("Ledger Entry")
-		debit_gl_entry.account = "Creditors"
-		debit_gl_entry.credit = flt(0, self.precision("amount"))
-		debit_gl_entry.debit = self.amount
-		debit_gl_entry.submit()
-
-		# Credit the "Expenses" account
-		credit_gl_entry = frappe.new_doc("Ledger Entry")
-		credit_gl_entry.account = self.credit_account
-		credit_gl_entry.credit = self.amount
-		credit_gl_entry.debit = flt(0, self.precision("amount"))
-		credit_gl_entry.submit()
-
 	def on_cancel(self):
 		if self.voucher_type == "Purchase Invoice":
-			self.make_reverse_pi_gl_entries()
+			self.make_gl_entries("Creditors", self.credit_account, reverse=True)
 		else:
-			self.make_reverse_si_gl_entries()
+			self.make_gl_entries("Sales", "Debtors", reverse=True)
 		
 		self.update_linked_voucher()
-
-	def make_reverse_pi_gl_entries(self):
-		# Credit the "Expenses" account
-		debit_gl_entry = frappe.new_doc("Ledger Entry")
-		debit_gl_entry.account = self.credit_account
-		debit_gl_entry.credit = flt(0, self.precision("amount"))
-		debit_gl_entry.debit = self.amount
-		debit_gl_entry.submit()
-
-		# Debit the "Creditors" account
-		credit_gl_entry = frappe.new_doc("Ledger Entry")
-		credit_gl_entry.account = "Creditors"
-		credit_gl_entry.credit = self.amount
-		credit_gl_entry.debit = flt(0, self.precision("amount"))
-		credit_gl_entry.submit()
-
-	def make_si_gl_entries(self):
-		# Credit
-		credit_gle = frappe.new_doc("Ledger Entry")
-		credit_gle.account = "Debtors"
-		credit_gle.credit = self.amount
-		credit_gle.debit = flt(0, self.precision("amount"))
-		credit_gle.submit()
-
-		# Debit
-		debit_gle = frappe.new_doc("Ledger Entry")
-		debit_gle.account = "Sales"
-		debit_gle.debit = self.amount
-		debit_gle.credit = flt(0, self.precision("amount"))
-		debit_gle.submit()
-
-	def make_reverse_si_gl_entries(self):
-		# Credit
-		credit_gle = frappe.new_doc("Ledger Entry")
-		credit_gle.account = "Sales"
-		credit_gle.credit = self.amount
-		credit_gle.debit = flt(0, self.precision("amount"))
-		credit_gle.submit()
-
-		# Debit
-		debit_gle = frappe.new_doc("Ledger Entry")
-		debit_gle.account = "Debtors"
-		debit_gle.debit = self.amount
-		debit_gle.credit = flt(0, self.precision("amount"))
-		debit_gle.submit()
 
 	def update_linked_voucher(self):
 		voucher = frappe.get_doc(self.voucher_type, self.voucher_link)
 		voucher.paid = True
 		voucher.set_status()
 		voucher.save()
+
+	def make_gl_entries(self, debit_acc, credit_acc, reverse=False):
+		if reverse:
+			debit_acc, credit_acc = credit_acc, debit_acc
+		# Debit
+		debit_gl_entry = frappe.new_doc("Ledger Entry")
+		debit_gl_entry.account = debit_acc
+		debit_gl_entry.credit = flt(0, self.precision("amount"))
+		debit_gl_entry.debit = self.amount
+		debit_gl_entry.submit()
+
+		# Credit
+		credit_gl_entry = frappe.new_doc("Ledger Entry")
+		credit_gl_entry.account = credit_acc
+		credit_gl_entry.credit = self.amount
+		credit_gl_entry.debit = flt(0, self.precision("amount"))
+		credit_gl_entry.submit()
 
 @frappe.whitelist()
 def get_payment_entry(dt, dn):
