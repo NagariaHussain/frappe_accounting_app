@@ -11,7 +11,8 @@
   "naming_series",
   "voucher_type",
   "amended_from",
-  "voucher_link"
+  "voucher_link",
+  "credit_account"
  ],
  "fields": [
   {
@@ -57,12 +58,18 @@
    "fieldtype": "Dynamic Link",
    "label": "Voucher Link",
    "options": "voucher_type"
+  },
+  {
+   "fieldname": "credit_account",
+   "fieldtype": "Link",
+   "label": "Credit Account",
+   "options": "Account"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-16 12:56:46.024457",
+ "modified": "2021-03-16 14:15:10.183593",
  "modified_by": "Administrator",
  "module": "Accounting App",
  "name": "Payment Entry",
