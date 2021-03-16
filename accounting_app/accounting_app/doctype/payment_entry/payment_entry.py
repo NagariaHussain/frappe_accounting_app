@@ -14,10 +14,7 @@ class PaymentEntry(Document):
 		else:
 			pass
 		
-		voucher = frappe.get_doc(self.voucher_type, self.voucher_link)
-		voucher.paid = True
-		voucher.set_status()
-		voucher.save()
+		self.update_linked_voucher()
 
 	def make_pi_gl_entries(self):
 		# Debit the "Creditors" account
@@ -40,10 +37,7 @@ class PaymentEntry(Document):
 		else:
 			pass
 		
-		voucher = frappe.get_doc(self.voucher_type, self.voucher_link)
-		voucher.paid = False
-		voucher.set_status()
-		voucher.save()
+		self.update_linked_voucher()
 
 	def make_reverse_pi_gl_entries(self):
 		# Credit the "Expenses" account
@@ -59,6 +53,12 @@ class PaymentEntry(Document):
 		credit_gl_entry.credit = self.amount
 		credit_gl_entry.debit = flt(0, self.precision("amount"))
 		credit_gl_entry.submit()
+
+	def update_linked_voucher(self):
+		voucher = frappe.get_doc(self.voucher_type, self.voucher_link)
+		voucher.paid = True
+		voucher.set_status()
+		voucher.save()
 
 @frappe.whitelist()
 def get_payment_entry(dt, dn):
