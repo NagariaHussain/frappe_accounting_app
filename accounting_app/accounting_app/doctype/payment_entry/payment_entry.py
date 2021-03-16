@@ -16,6 +16,7 @@ class PaymentEntry(Document):
 		
 		voucher = frappe.get_doc(self.voucher_type, self.voucher_link)
 		voucher.paid = True
+		voucher.set_status()
 		voucher.save()
 
 	def make_pi_gl_entries(self):
