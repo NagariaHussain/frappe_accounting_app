@@ -8,13 +8,23 @@ from frappe.model.document import Document
 from frappe.utils import nowdate, flt
 
 class PaymentEntry(Document):
+	def validate(self):
+		if self.voucher_type == "Purchase Invoice":
+			ca = frappe.get_doc("Account", self.credit_account)
+			if not (ca.root_type == "Expense"):
+				frappe.throw("Credit Account should be of type: Expense")
+		elif self.voucher_type == "Sales Invoice":
+			da = frappe.get_doc("Account", self.debit_account)
+			if not (da.root_type == "Income"):
+				frappe.throw("Debit Account should be of type: Income")
+		else:
+			frappe.throw("Payment entry can only be made against SI or PI")
+
 	def on_submit(self):
 		if self.voucher_type == "Purchase Invoice":
 			self.make_gl_entries("Creditors", self.credit_account)
 		elif self.voucher_type == "Sales Invoice":
-			self.make_gl_entries("Sales", "Debtors")
-		else:
-			frappe.throw("Payment entry can only be made against SI or PI")
+			self.make_gl_entries(self.debit_account, "Debtors")
 
 		self.update_linked_voucher()
 
@@ -22,7 +32,7 @@ class PaymentEntry(Document):
 		if self.voucher_type == "Purchase Invoice":
 			self.make_gl_entries("Creditors", self.credit_account, reverse=True)
 		else:
-			self.make_gl_entries("Sales", "Debtors", reverse=True)
+			self.make_gl_entries(self.debit_account, "Debtors", reverse=True)
 		
 		self.update_linked_voucher()
 
