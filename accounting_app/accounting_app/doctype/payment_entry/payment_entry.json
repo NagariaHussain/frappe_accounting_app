@@ -12,7 +12,8 @@
   "voucher_type",
   "amended_from",
   "voucher_link",
-  "credit_account"
+  "credit_account",
+  "debit_account"
  ],
  "fields": [
   {
@@ -60,17 +61,26 @@
    "options": "voucher_type"
   },
   {
+   "depends_on": "eval: doc.voucher_type == 'Purchase Invoice'",
    "fieldname": "credit_account",
    "fieldtype": "Link",
    "label": "Credit Account",
-   "options": "Account",
-   "reqd": 1
+   "mandatory_depends_on": "eval: doc.voucher_type == 'Purchase Invoice'",
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval: doc.voucher_type == 'Sales Invoice'",
+   "fieldname": "debit_account",
+   "fieldtype": "Link",
+   "label": "Debit Account",
+   "mandatory_depends_on": "eval: doc.voucher_type == 'Sales Invoice'",
+   "options": "Account"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-16 14:28:59.919312",
+ "modified": "2021-03-17 07:58:37.484581",
  "modified_by": "Administrator",
  "module": "Accounting App",
  "name": "Payment Entry",
