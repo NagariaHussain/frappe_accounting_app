@@ -5,8 +5,8 @@
 from __future__ import unicode_literals
 # import frappe
 from frappe.model.document import Document
-from frappe.utils import getdate
+from frappe.utils import today
 
 class LedgerEntry(Document):
-	def on_submit(self):
-		self.posting_date = getdate()
+	def validate(self):
+		self.posting_date = today()
