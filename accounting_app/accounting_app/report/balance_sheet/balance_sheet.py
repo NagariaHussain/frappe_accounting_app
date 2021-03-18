@@ -6,6 +6,7 @@ import frappe
 import functools
 import re
 from past.builtins import cmp
+from frappe.utils import getdate
 
 def execute(filters=None):
 	columns, data = [], []
@@ -39,7 +40,7 @@ def filter_accounts(accounts, depth=20):
 	add_to_list(None, 0)
 
 	return filtered_accounts, accounts_by_name, parent_children_map
-	
+
 def sort_accounts(accounts, is_root=False, key="name"):
 	def compare_accounts(a, b):
 		if re.split('\W+', a[key])[0].isdigit():
@@ -60,3 +61,28 @@ def sort_accounts(accounts, is_root=False, key="name"):
 		return 1
 
 	accounts.sort(key = functools.cmp_to_key(compare_accounts))
+
+def set_gl_entries_by_account(gl_entries_by_account, from_date, to_date, root_lft, root_rgt):
+	"""Returns a dict like { "account": [gl entries], ... }"""
+	accounts = frappe.db.sql_list("""select name from `tabAccount`
+		where lft >= %s and rgt <= %s""", (root_lft, root_rgt))
+	
+	additional_conditions = ""
+
+	if accounts:
+		additional_conditions += "account in ({})"\
+			.format(", ".join([frappe.db.escape(d) for d in accounts]))
+
+	sql_statement = """select posting_date, account, debit, credit from `tabLedger Entry`
+						where {additional_conditions}
+						and posting_date between '{from_date}' and '{to_date}'
+						order by account, posting_date""".format(
+			additional_conditions=additional_conditions, to_date=to_date, from_date=from_date
+		)
+
+	gl_entries = frappe.db.sql(sql_statement, as_dict=True) 
+	
+	for entry in gl_entries:
+			gl_entries_by_account.setdefault(entry.account, []).append(entry)
+
+	return gl_entries_by_account
