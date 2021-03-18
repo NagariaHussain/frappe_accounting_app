@@ -4,6 +4,17 @@
 
 frappe.query_reports["Balance Sheet"] = {
 	"filters": [
-
+		{
+			"fieldname":"from_date",
+			"label": __("Start Date"),
+			"fieldtype": "Date",
+			"reqd": 1
+		},
+		{
+			"fieldname":"to_date",
+			"label": __("End Date"),
+			"fieldtype": "Date",
+			"reqd": 1
+		}
 	]
 };
