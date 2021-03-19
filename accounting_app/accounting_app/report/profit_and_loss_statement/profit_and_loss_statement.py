@@ -22,7 +22,9 @@ def execute(filters=None):
 	
 	columns = get_columns()
 
-	return columns, data
+	report_summary = get_report_summary(income, expense, net_profit_loss)
+	
+	return columns, data, None, None, report_summary
 
 
 def get_net_profit_loss(income, expense):
@@ -38,3 +40,35 @@ def get_net_profit_loss(income, expense):
 	net_profit_loss['opening_balance'] = total_income - total_expense
 
 	return net_profit_loss
+
+def get_report_summary(income, expense, net_profit_loss):
+	net_income, net_expense, net_profit = 0.0, 0.0, 0.0
+
+	net_income = flt(income[-2]['opening_balance'], 3)
+	net_expense = flt(expense[-2]['opening_balance'], 3)
+	net_profit = flt(net_profit_loss['opening_balance'], 3)
+
+	profit_label = frappe._("Net Profit")
+	income_label = frappe._("Total Income")
+	expense_label = frappe._("Total Expense")
+
+	return [
+		{
+			"value": net_income,
+			"label": income_label,
+			"datatype": "Currency"
+		},
+		{ "type": "separator", "value": "-"},
+		{
+			"value": net_expense,
+			"label": expense_label,
+			"datatype": "Currency"
+		},
+		{ "type": "separator", "value": "=", "color": "blue"},
+		{
+			"value": net_profit,
+			"indicator": "Green" if net_profit > 0 else "Red",
+			"label": profit_label,
+			"datatype": "Currency"
+		}
+	]
