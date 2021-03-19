@@ -1,1 +1,20 @@
-<h1>This will be the catalog</h1>
+{% extends "templates/web.html" %}
+
+<!-- add-breadcrumbs -->
+
+{% block page_content %}
+    <h1>Our products</h1>
+
+    <div>
+        {% set products = frappe.get_all('Item') %}
+
+        {% for product in products %}
+            <div class="mt-4">
+                <h3>
+                    {{product.name}}
+                </h3>
+                <button class="btn btn-success">Add to cart</button>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
