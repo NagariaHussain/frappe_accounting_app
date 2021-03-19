@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 import frappe
-from accounting_app.accounting_app.report.financial_statements import get_data
+from accounting_app.accounting_app.report.financial_statements import get_data, get_columns
 
 def execute(filters=None):
 	columns, data = [], []
@@ -23,21 +23,3 @@ def execute(filters=None):
 	columns = get_columns()
 
 	return columns, data
-
-def get_columns():
-	columns = [{
-		"fieldname": "account",
-		"label": frappe._("Account"),
-		"fieldtype": "Link",
-		"options": "Account",
-		"width": 300
-	}, 
-	{
-		"fieldname": "opening_balance",
-		"label": "Amount",
-		"fieldtype": "Currency",
-		"options": "currency",
-		"width": 150
-	}]
-
-	return columns

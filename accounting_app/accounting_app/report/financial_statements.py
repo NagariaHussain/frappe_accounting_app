@@ -1,12 +1,13 @@
 from __future__ import unicode_literals
 
-import frappe
 import functools
 import re
 
+import frappe
+from frappe.utils import flt, getdate
 from past.builtins import cmp
-from frappe.utils import getdate, flt
 from six import itervalues
+
 
 def get_data(root_type, balance_must_be, from_date, to_date, total = True):
 	accounts = get_accounts(root_type)
@@ -188,3 +189,21 @@ def add_total_row(out, root_type, balance_must_be):
 
 		# blank row after Total
 		out.append({})
+
+def get_columns():
+	columns = [{
+		"fieldname": "account",
+		"label": frappe._("Account"),
+		"fieldtype": "Link",
+		"options": "Account",
+		"width": 300
+	}, 
+	{
+		"fieldname": "opening_balance",
+		"label": "Amount",
+		"fieldtype": "Currency",
+		"options": "currency",
+		"width": 150
+	}]
+
+	return columns
