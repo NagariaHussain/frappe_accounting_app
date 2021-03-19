@@ -53,7 +53,7 @@ def get_data(root_type, balance_must_be, from_date, to_date, total = True):
 	if not accounts:
 		return None
 
-	accounts, accounts_by_name, parent_children_map = filter_accounts(accounts)
+	accounts, accounts_by_name = filter_accounts(accounts)
 
 	gl_entries_by_account = {}
 	for root in frappe.db.sql("""select lft, rgt from tabAccount
@@ -104,7 +104,7 @@ def filter_accounts(accounts, depth=20):
 
 	add_to_list(None, 0)
 
-	return filtered_accounts, accounts_by_name, parent_children_map
+	return filtered_accounts, accounts_by_name
 
 def sort_accounts(accounts, is_root=False, key="name"):
 	def compare_accounts(a, b):
