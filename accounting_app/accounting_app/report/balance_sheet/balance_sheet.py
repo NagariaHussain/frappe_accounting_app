@@ -38,7 +38,7 @@ def get_columns():
 		"width": 300
 	}, 
 	{
-		"fieldname": "to_date",
+		"fieldname": "opening_balance",
 		"label": "Amount",
 		"fieldtype": "Currency",
 		"options": "currency",
@@ -66,13 +66,12 @@ def get_data(root_type, balance_must_be, from_date, to_date, total = True):
 			root.lft, root.rgt)
 	
 	calculate_values(
-		accounts_by_name, gl_entries_by_account)
+		accounts_by_name, gl_entries_by_account, to_date)
+	
 	accumulate_values_into_parents(accounts, accounts_by_name)
 
 	out = prepare_data(accounts, balance_must_be, from_date, to_date)
-	print("out1", out)
-	# out = filter_out_zero_value_rows(out, parent_children_map)
-	print("out2", out)
+
 	if out and total:
 		add_total_row(out, root_type, balance_must_be)
 
@@ -153,11 +152,18 @@ def set_gl_entries_by_account(gl_entries_by_account, from_date, to_date, root_lf
 
 	return gl_entries_by_account
 
-def calculate_values(accounts_by_name, gl_entries_by_account):
+def calculate_values(accounts_by_name, gl_entries_by_account, to_date):
 	for entries in itervalues(gl_entries_by_account):
 		for entry in entries:
 			d = accounts_by_name.get(entry.account)
-			d["opening_balance"] = d.get("opening_balance", 0.0) + flt(entry.debit) - flt(entry.credit)
+			if not d:
+				frappe.msgprint(
+					frappe._("Could not retrieve information for {0}.").format(entry.account), title="Error",
+					raise_exception=1
+				)
+
+			if entry.posting_date < getdate(to_date):
+				d["opening_balance"] = d.get("opening_balance", 0.0) + flt(entry.debit) - flt(entry.credit)
 
 def accumulate_values_into_parents(accounts, accounts_by_name):
 	"""accumulate children's values in parent accounts"""
@@ -188,7 +194,6 @@ def prepare_data(accounts, balance_must_be, from_date, to_date):
 				if d.account_number else frappe._(d.account_name))
 		})
 
-		
 		row["to_date"] = flt(d.get("to_date", 0.0), 3)
 
 		if abs(row["to_date"]) >= 0.005:
@@ -210,10 +215,9 @@ def add_total_row(out, root_type, balance_must_be):
 
 	for row in out:
 		if not row.get("parent_account"):
-			total_row.setdefault('to_date', 0.0)
-			total_row['to_date'] += row.get('to_date', 0.0)
-			row['to_date'] = row.get('to_date', 0.0)
-
+			total_row.setdefault('opening_balance', 0.0)
+			total_row['opening_balance'] += row.get('opening_balance', 0.0)
+			row['opening_balance'] = row.get('opening_balance', 0.0)
 			total_row.setdefault("total", 0.0)
 			total_row["total"] += flt(row["total"])
 			row["total"] = ""
