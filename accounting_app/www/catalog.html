@@ -4,7 +4,7 @@
 
 {% block page_content %}
     <h1>Our products</h1>
-
+    <button class="btn" id="view-cart-button">View Cart</button>
     <div>
         {% set products = frappe.get_all('Item') %}
 

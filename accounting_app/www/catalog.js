@@ -9,6 +9,21 @@ for (let button of add_to_cart_buttons) {
     button.addEventListener('click', atcButtonListener);
 }
 
+// Add click listener to view cart button
+const viewCartButton = document.getElementById("view-cart-button");
+viewCartButton.addEventListener('click', (event) => {
+    let cartHTML = getCartHTML(cart);
+
+    frappe.msgprint({
+        title: __('Cart'),
+        message: cartHTML,
+        primary_action: {
+            'label': __('Generate Invoice')
+        }
+    });
+});
+
+
 // Add to cart event callback
 function atcButtonListener(event) {
     const atcButton = event.target;
@@ -32,4 +47,21 @@ function atcButtonListener(event) {
         atcButton.innerText = 'Remove';
         atcButton.classList.replace('btn-success', 'btn-danger');
     }
+}
+
+
+// Generate and return cart HTML content
+function getCartHTML(cartList)
+{
+    if (cartList.length === 0) {
+        return "No items in cart";
+    }
+
+    let html = "";
+    for (let item of cartList) {
+        html += `<li>${item}</li>`
+    }
+    html = `<ol>${html}</ol>`
+
+    return html;
 }
