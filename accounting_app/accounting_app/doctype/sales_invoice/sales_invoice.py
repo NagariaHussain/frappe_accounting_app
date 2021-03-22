@@ -77,5 +77,6 @@ class SalesInvoice(Document):
 		debit_gle.credit = flt(0, self.precision("grand_total"))
 		debit_gle.submit()
 
-
-	
+@frappe.whitelist(allow_guest=True)
+def generate_invoice():
+	return "Here goes the invoice"

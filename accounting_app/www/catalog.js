@@ -18,11 +18,21 @@ viewCartButton.addEventListener('click', (event) => {
         title: __('Cart'),
         message: cartHTML,
         primary_action: {
-            'label': __('Generate Invoice')
+            'label': __('Generate Invoice'),
+            action: downloadInvoice
         }
     });
 });
 
+function downloadInvoice() {
+    frappe.call({
+        method: 'accounting_app.accounting_app.doctype.sales_invoice.sales_invoice.generate_invoice',
+        callback: (_) => frappe.show_alert({
+            message: __('Invoice Download started!'),
+            indicator: 'green' 
+        }, 4)
+    });
+}
 
 // Add to cart event callback
 function atcButtonListener(event) {
