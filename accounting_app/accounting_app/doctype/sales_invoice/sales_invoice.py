@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe.model.document import Document
+from six.moves.urllib.parse import parse_qsl
 from frappe.utils import flt
 from frappe.utils.pdf import get_pdf
 
@@ -81,10 +82,20 @@ class SalesInvoice(Document):
 
 @frappe.whitelist(allow_guest=True)
 def generate_invoice():
+	query_string = frappe.local.request.query_string
+	query = dict(parse_qsl(query_string))
+	query = {key.decode(): val.decode() for key, val in query.items()}
+	
 	name = "customer invoice"
 	html = '''
 <h1>Invoice for Gada Electronics e-Store!</h1>
 	'''
+
+	# Add items to PDF HTML
+	html += "<ol>"
+	for item, qty in query.items():
+		html += f"<li>{item} - {qty}</li>"
+	html += "</ol>"
 	
 	frappe.local.response.filename = "{name}.pdf".format(name=name.replace(" ", "-").replace("/", "-"))
 	frappe.local.response.filecontent = get_pdf(html)

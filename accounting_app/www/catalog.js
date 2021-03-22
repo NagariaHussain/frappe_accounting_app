@@ -25,13 +25,25 @@ viewCartButton.addEventListener('click', (event) => {
 });
 
 function downloadInvoice() {
+    const itemsQuery = getCartItemsAsQueryString(); 
     const w = window.open(
-        get_full_url('/api/method/accounting_app.accounting_app.doctype.sales_invoice.sales_invoice.generate_invoice')
+        get_full_url(
+            '/api/method/accounting_app.accounting_app.doctype.sales_invoice.sales_invoice.generate_invoice?'
+            + itemsQuery)
     );
 
     if (!w) {
         frappe.msgprint('Please enable popups!');
     }
+}
+
+function getCartItemsAsQueryString() {
+    let queryString = "";
+    for (let item of cart) {
+        queryString += encodeURIComponent(item.name) + `=${item.qty}&`
+    }
+
+    return queryString;
 }
 
 // Add to cart event callback
@@ -41,16 +53,23 @@ function atcButtonListener(event) {
 
     if (atcButton.hasAttribute('data-added')) {
         // Item already added to cart, remove it
-        const itemIndex = cart.indexOf(itemName);
+        const itemIndex = cart.findIndex((i) => (i.name == itemName));
         cart.splice(itemIndex, 1);
+        
         // Remove the added attribute
         atcButton.removeAttribute('data-added');
+        
         // Change button style and text
         atcButton.innerText = 'Add to cart';
         atcButton.classList.replace('btn-danger', 'btn-success');
+
     } else {
         // Add this item to cart
-        cart.push(itemName);
+        cart.push({
+            name: itemName,
+            qty: 1
+        });
+
         // Add the added attribute
         atcButton.setAttribute('data-added', '');
         // Change button style and text
@@ -69,7 +88,7 @@ function getCartHTML(cartList)
 
     let html = "";
     for (let item of cartList) {
-        html += `<li>${item}</li>`
+        html += `<li>${item.name} - ${item.qty}</li>`
     }
     html = `<ol>${html}</ol>`
 
