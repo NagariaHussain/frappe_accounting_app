@@ -7,6 +7,8 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe.utils import flt
+from frappe.utils.pdf import get_pdf
+
 
 class SalesInvoice(Document):
 	def validate(self):
@@ -79,4 +81,11 @@ class SalesInvoice(Document):
 
 @frappe.whitelist(allow_guest=True)
 def generate_invoice():
-	return "Here goes the invoice"
+	name = "customer invoice"
+	html = '''
+<h1>Invoice for Gada Electronics e-Store!</h1>
+	'''
+	
+	frappe.local.response.filename = "{name}.pdf".format(name=name.replace(" ", "-").replace("/", "-"))
+	frappe.local.response.filecontent = get_pdf(html)
+	frappe.local.response.type = "pdf"

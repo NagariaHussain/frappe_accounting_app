@@ -25,13 +25,13 @@ viewCartButton.addEventListener('click', (event) => {
 });
 
 function downloadInvoice() {
-    frappe.call({
-        method: 'accounting_app.accounting_app.doctype.sales_invoice.sales_invoice.generate_invoice',
-        callback: (_) => frappe.show_alert({
-            message: __('Invoice Download started!'),
-            indicator: 'green' 
-        }, 4)
-    });
+    const w = window.open(
+        get_full_url('/api/method/accounting_app.accounting_app.doctype.sales_invoice.sales_invoice.generate_invoice')
+    );
+
+    if (!w) {
+        frappe.msgprint('Please enable popups!');
+    }
 }
 
 // Add to cart event callback
@@ -74,4 +74,19 @@ function getCartHTML(cartList)
     html = `<ol>${html}</ol>`
 
     return html;
+}
+
+function get_full_url(url) {
+    if(url.indexOf("http://")===0 || url.indexOf("https://")===0) {
+        return url;
+    }
+    return url.substr(0,1)==="/" ?
+        (get_base_url() + url) :
+        (get_base_url() + "/" + url);
+}
+
+function get_base_url() {
+    let url = (frappe.base_url || window.location.origin);
+    if(url.substr(url.length-1, 1)=='/') url = url.substr(0, url.length-1);
+    return url;
 }
