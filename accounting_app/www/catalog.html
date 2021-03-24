@@ -1,0 +1,20 @@
+{% extends "templates/web.html" %}
+
+<!-- add-breadcrumbs -->
+
+{% block page_content %}
+    <h1>Our products</h1>
+    <button class="btn" id="view-cart-button">View Cart</button>
+    <div>
+        {% set products = frappe.get_all('Item') %}
+
+        {% for product in products %}
+            <div class="mt-4">
+                <h3>
+                    {{product.name}}
+                </h3>
+                <button class="btn btn-success atc-button" data-name="{{ product.name }}">Add to cart</button>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
