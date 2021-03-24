@@ -8,7 +8,8 @@
  "field_order": [
   "item_name",
   "brand",
-  "description"
+  "description",
+  "price"
  ],
  "fields": [
   {
@@ -28,11 +29,18 @@
    "label": "Item Name",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "price",
+   "fieldtype": "Currency",
+   "label": "Listing Price",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-03-02 13:16:03.400165",
+ "modified": "2021-03-24 23:22:43.271519",
  "modified_by": "Administrator",
  "module": "Accounting App",
  "name": "Item",
