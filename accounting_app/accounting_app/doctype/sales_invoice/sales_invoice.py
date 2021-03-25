@@ -9,7 +9,7 @@ from frappe.model.document import Document
 from six.moves.urllib.parse import parse_qsl
 from frappe.utils import flt
 from frappe.utils.pdf import get_pdf
-
+from frappe import get_print
 
 class SalesInvoice(Document):
 	def validate(self):
@@ -86,17 +86,23 @@ def generate_invoice():
 	query = dict(parse_qsl(query_string))
 	query = {key.decode(): val.decode() for key, val in query.items()}
 	
-	name = "customer invoice"
-	html = '''
-<h1>Invoice for Gada Electronics e-Store!</h1>
-	'''
-
-	# Add items to PDF HTML
-	html += "<ol>"
-	for item, qty in query.items():
-		html += f"<li>{item} - {qty}</li>"
-	html += "</ol>"
-	
+	name = "customer invoice"	
 	frappe.local.response.filename = "{name}.pdf".format(name=name.replace(" ", "-").replace("/", "-"))
-	frappe.local.response.filecontent = get_pdf(html)
+
+	# Create a temp SI
+	doc = frappe.new_doc('Sales Invoice')
+	doc.title = "E-Store Invoice"
+	doc.items = []
+
+	for item, qty in query.items():
+		qty = int(qty)
+		rate = frappe.get_doc('Item', item, feilds=['price']).price
+		doc.items.append(frappe._dict(
+			{"item": item, "qty": qty, "rate": rate, "amount": rate * qty}
+		))
+
+	# Generate PDF document
+	frappe.local.response.filecontent = get_print(
+		doc.doctype, doc.name, doc = doc, print_format = "Store Invoice", as_pdf=True
+	)
 	frappe.local.response.type = "pdf"
