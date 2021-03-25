@@ -34,13 +34,14 @@
    "default": "0",
    "fieldname": "price",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Listing Price",
    "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-03-24 23:22:43.271519",
+ "modified": "2021-03-25 06:41:59.611718",
  "modified_by": "Administrator",
  "module": "Accounting App",
  "name": "Item",
