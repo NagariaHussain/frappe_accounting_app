@@ -10,7 +10,7 @@ from accounting_app.accounting_app.doctype.payment_entry.payment_entry import ge
 
 class TestPaymentEntry(unittest.TestCase):
 	def test_get_payment_entry_for_pi(self):
-		pi = get_sample_pi()
+		pi = get_sample_voucher_of_type('Purchase Invoice')
 
 		pe = get_payment_entry('Purchase Invoice', pi.name)
 
@@ -18,25 +18,34 @@ class TestPaymentEntry(unittest.TestCase):
 		self.assertEqual(pe.voucher_type, 'Purchase Invoice', "Voucher type should be PI")
 		self.assertEqual(pe.voucher_link, pi.name, "PI name does not match with PE's linked name")
 
-def get_sample_pi():
-	pi = frappe.new_doc('Purchase Invoice')
-	pi.title = "Test Purchase Invoice"
+	def test_get_payment_entry_for_si(self):
+		si = get_sample_voucher_of_type('Sales Invoice')
+
+		pe = get_payment_entry('Sales Invoice', si.name)
+
+		self.assertEqual(pe.amount, si.grand_total, "PE's amount and si's grand_total does not match")
+		self.assertEqual(pe.voucher_type, 'Sales Invoice', "Voucher type should be si")
+		self.assertEqual(pe.voucher_link, si.name, "si name does not match with PE's linked name")
+
+def get_sample_voucher_of_type(v_type):
+	voucher = frappe.new_doc(v_type)
+	voucher.title = f"Test {v_type}"
 
 	# Add sample items to child table
-	pi.append("items", {
+	voucher.append("items", {
 			"item": "Envy 13",
 			"qty": 10,
 			"rate": 100,
 			"amount": 1000
 		})
 
-	pi.append("items", {
+	voucher.append("items", {
 			"item": "iPhone 12",
 			"qty": 5,
 			"rate": 10,
 			"amount": 50
 		})
 
-	pi.insert()
+	voucher.insert()
 
-	return pi
+	return voucher
