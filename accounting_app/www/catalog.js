@@ -39,11 +39,25 @@ function downloadInvoice() {
 
 function getCartItemsAsQueryString() {
     let queryString = "";
+    setQty(cart);
     for (let item of cart) {
         queryString += encodeURIComponent(item.name) + `=${item.qty}&`
     }
 
     return queryString;
+}
+
+function setQty(cart) {
+    const qtyInputs = document.getElementsByClassName('qty-input');
+
+    for (let input of qtyInputs) {
+        const name = input.getAttribute('data-name');
+        const qty = input.value;
+        
+        // inefficient, should change the structure of cart object instead
+        const itemIndex = cart.findIndex((i) => (i.name == name));
+        cart[itemIndex].qty = qty;
+    }
 }
 
 // Add to cart event callback
@@ -88,7 +102,17 @@ function getCartHTML(cartList)
 
     let html = "";
     for (let item of cartList) {
-        html += `<li>${item.name} - ${item.qty}</li>`
+        html += `<li>${item.name}`
+        // Add qty input
+        html += `
+        <div class="input-group my-3">
+        <input data-name="${item.name}" type="number" class="form-control qty-input" placeholder="Qty" aria-label="Recipient's username" aria-describedby="basic-addon2" value=${item.qty}>
+        <div class="input-group-append">
+            <span class="input-group-text" id="basic-addon2">Units</span>
+        </div>
+        </div>
+        </li>
+        `
     }
     html = `<ol>${html}</ol>`
 
